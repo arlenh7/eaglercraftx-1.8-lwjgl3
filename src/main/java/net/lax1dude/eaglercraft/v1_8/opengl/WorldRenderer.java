@@ -188,7 +188,7 @@ public class WorldRenderer {
 	public void putBrightness4(int parInt1, int parInt2, int parInt3, int parInt4) {
 		VertexFormat fmt = this.vertexFormat;
 		int j = fmt.attribStride >> 2;
-		int i = (this.vertexCount - 4) * j;
+		int i = (this.vertexCount - 4) * j + (fmt.attribLightmapOffset >> 2);
 		this.intBuffer.put(i, parInt1);
 		this.intBuffer.put(i + j, parInt2);
 		this.intBuffer.put(i + j * 2, parInt3);
@@ -208,7 +208,7 @@ public class WorldRenderer {
 
 	public WorldRenderer lightmap(int parInt1, int parInt2) {
 		VertexFormat fmt = this.vertexFormat;
-		int i = this.vertexCount * fmt.attribStride;
+		int i = this.vertexCount * fmt.attribStride + fmt.attribLightmapOffset;
 		this.byteBuffer.putShort(i, (short) parInt2);
 		this.byteBuffer.putShort(i + 2, (short) parInt1);
 		return this;
