@@ -2,6 +2,8 @@ package net.lax1dude.eaglercraft.v1_8.internal.teavm;
 
 import org.teavm.jso.JSBody;
 
+import net.lax1dude.eaglercraft.v1_8.sp.server.internal.teavm.WorkerMain;
+
 /**
  * Copyright (c) 2022-2024 lax1dude. All Rights Reserved.
  * 
@@ -21,7 +23,11 @@ public class MainClass {
 
 	public static void main(String[] args) {
 		installGsonAnonymousClassCompat();
-		clientMain();
+		if(args.length == 1 && "_worker_process_".equalsIgnoreCase(args[0])) {
+			workerMain();
+		}else {
+			clientMain();
+		}
 	}
 
 	@JSBody(params = {}, script = "// Eagler MainClass gson compat patch\n"
@@ -71,5 +77,9 @@ public class MainClass {
 
 	private static void clientMain() {
 		ClientMain._main();
+	}
+
+	private static void workerMain() {
+		WorkerMain._main();
 	}
 }
