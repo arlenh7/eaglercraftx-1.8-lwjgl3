@@ -755,7 +755,12 @@ public class PlatformInput {
 			} else {
 				if (fpsLimit <= 0 || fpsLimit > 1000) {
 					syncTimer = 0.0;
-					PlatformRuntime.sleep(0);
+					try {
+						PlatformRuntime.sleep(0);
+					} catch (Throwable t) {
+						PlatformRuntime.swapDelayTeaVM();
+					}
+					
 				} else {
 					double frameMillis = (1000.0 / fpsLimit);
 					if (syncTimer == 0.0) {
