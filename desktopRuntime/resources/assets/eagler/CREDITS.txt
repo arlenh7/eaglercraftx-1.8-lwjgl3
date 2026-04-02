@@ -2,6 +2,15 @@
  EaglercraftX Developers
  ~~~~~~~~~~~~~~~~~~~~~~~
 
+ arlen:
+  - Ported LWJGL3 to TeaVM
+  - Made OpenGL 3.0 emulator
+  - Added it to EaglercraftX
+  - Fixed Rendering Errors
+  - Fixed input lag without VSync
+  - Optimized
+
+
  lax1dude:
 
   - Creator of Eaglercraft

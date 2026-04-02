@@ -539,9 +539,7 @@ public class Minecraft implements IThreadListener {
 
 		boolean vsyncScreen = false;
 		if (EagRuntime.getConfiguration().isEnforceVSync() && Display.isVSyncSupported() && !gameSettings.enableVsync) {
-			gameSettings.enableVsync = true;
-			gameSettings.saveOptions();
-			vsyncScreen = true;
+			vsyncScreen = false;
 		}
 
 		int vidIssues = gameSettings.checkBadVideoSettings();

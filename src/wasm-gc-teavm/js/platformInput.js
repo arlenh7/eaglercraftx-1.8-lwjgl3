@@ -633,12 +633,9 @@ async function initPlatformInput(inputImports) {
 				manualSyncTimer = 0;
 				return asyncRequestAnimationFrame();
 			}else {
-				if(finish) {
-					webglContext.finish();
-				}
 				if(fpsLimit <= 0) {
 					manualSyncTimer = 0;
-					return swapDelayImpl();
+					return sleepImpl(0);
 				}else {
 					return syncDelay(fpsLimit);
 				}

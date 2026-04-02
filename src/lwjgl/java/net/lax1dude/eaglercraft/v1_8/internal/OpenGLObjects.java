@@ -127,7 +127,6 @@ class OpenGLObjects {
 		@Override
 		public boolean isAnisotropic() {
 			return this.anisotropic;
-			throw new UnsupportedOperationException("Unimplemented method 'isAnisotropic'");
 		}
 
 	}

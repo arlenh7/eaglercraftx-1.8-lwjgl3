@@ -753,12 +753,9 @@ public class PlatformInput {
 				syncTimer = 0.0;
 				asyncRequestAnimationFrame();
 			} else {
-				if (finish) {
-					PlatformOpenGL.ctx.finish();
-				}
 				if (fpsLimit <= 0 || fpsLimit > 1000) {
 					syncTimer = 0.0;
-					PlatformRuntime.swapDelayTeaVM();
+					PlatformRuntime.sleep(0);
 				} else {
 					double frameMillis = (1000.0 / fpsLimit);
 					if (syncTimer == 0.0) {

@@ -1412,15 +1412,12 @@ public class GameSettings {
 	public int checkBadVideoSettings() {
 		return hideVideoSettingsWarning ? 0
 				: ((renderDistanceChunks > 6 ? GuiScreenVideoSettingsWarning.WARNING_RENDER_DISTANCE : 0)
-						| (!enableVsync ? GuiScreenVideoSettingsWarning.WARNING_VSYNC : 0)
 						| (limitFramerate < 30 ? GuiScreenVideoSettingsWarning.WARNING_FRAME_LIMIT : 0));
 	}
 
 	public void fixBadVideoSettings() {
 		if (renderDistanceChunks > 6)
 			renderDistanceChunks = 4;
-		if (!enableVsync)
-			enableVsync = true;
 		if (limitFramerate < 30)
 			limitFramerate = 260;
 	}
