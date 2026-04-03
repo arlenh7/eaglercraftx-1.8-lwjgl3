@@ -216,6 +216,7 @@ public class GameSettings {
 	public float touchControlOpacity = 1.0f;
 	public boolean hideDefaultUsernameWarning = false;
 	public boolean hideVideoSettingsWarning = EagRuntime.getPlatformType() == EnumPlatformType.DESKTOP;
+	public String betterFpsAlgorithm = MathHelper.getDefaultBetterFpsAlgorithm();
 
 	public int voiceListenRadius = 16;
 	public float voiceListenVolume = 0.5f;
@@ -255,6 +256,16 @@ public class GameSettings {
 		this.renderDistanceChunks = 4;
 		this.screenRecordCodec = ScreenRecordingController.getDefaultCodec();
 		this.loadOptions();
+		this.setBetterFpsAlgorithm(this.betterFpsAlgorithm);
+	}
+
+	public void setBetterFpsAlgorithm(String algorithm) {
+		this.betterFpsAlgorithm = MathHelper.normalizeBetterFpsAlgorithm(algorithm);
+		MathHelper.setBetterFpsAlgorithm(this.betterFpsAlgorithm);
+	}
+
+	public void cycleBetterFpsAlgorithm() {
+		this.setBetterFpsAlgorithm(MathHelper.cycleBetterFpsAlgorithm(this.betterFpsAlgorithm, 1));
 	}
 
 	/**+
@@ -1143,6 +1154,10 @@ public class GameSettings {
 						hideVideoSettingsWarning = astring[1].equals("true");
 					}
 
+					if (astring[0].equals("betterFpsAlgorithm")) {
+						this.setBetterFpsAlgorithm(astring[1]);
+					}
+
 					if (astring[0].equals("betterGrassOF")) {
 						betterGrassOF = Integer.parseInt(astring[1]);
 					}
@@ -1187,6 +1202,7 @@ public class GameSettings {
 				logger.error("Setting dynamic lights to false because they are not supported");
 				this.enableDynamicLights = false;
 			}
+			this.setBetterFpsAlgorithm(this.betterFpsAlgorithm);
 		} catch (Exception exception) {
 			logger.error("Failed to load options");
 			logger.error(exception);
@@ -1306,6 +1322,7 @@ public class GameSettings {
 			printwriter.println("touchControlOpacity:" + this.touchControlOpacity);
 			printwriter.println("hideDefaultUsernameWarning:" + this.hideDefaultUsernameWarning);
 			printwriter.println("hideVideoSettingsWarning:" + this.hideVideoSettingsWarning);
+			printwriter.println("betterFpsAlgorithm:" + this.betterFpsAlgorithm);
 			printwriter.println("betterGrassOF:" + this.betterGrassOF);
 			printwriter.println("connectedTexturesOF:" + this.connectedTexturesOF);
 			printwriter.println("customSkyOF:" + this.customSkyOF);

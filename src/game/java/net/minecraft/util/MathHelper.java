@@ -30,23 +30,154 @@ public class MathHelper {
 	 * (exclusive), with steps of 2*PI / 65536.
 	 */
 	private static final float[] SIN_TABLE = new float[65536];
+	private static final String[] BETTER_FPS_ALGORITHMS = new String[] { "vanilla", "rivens", "taylors",
+			"libgdx", "rivens-full", "rivens-half", "java", "random" };
+	private static final int BETTER_FPS_DEFAULT_ALGORITHM = 5;
+	private static final float BETTER_FPS_SIN_TO_COS = 1.5707964F;
+	private static final int BETTER_FPS_RIVENS_BITS = 12;
+	private static final int BETTER_FPS_RIVENS_MASK = -1 << BETTER_FPS_RIVENS_BITS ^ 0xFFFFFFFF;
+	private static final int BETTER_FPS_RIVENS_MASK2 = BETTER_FPS_RIVENS_MASK >> 1;
+	private static final int BETTER_FPS_RIVENS_COUNT = BETTER_FPS_RIVENS_MASK + 1;
+	private static final int BETTER_FPS_RIVENS_COUNT2 = BETTER_FPS_RIVENS_MASK2 + 1;
+	private static final float BETTER_FPS_RIVENS_RAD_FULL = 6.2831855F;
+	private static final float BETTER_FPS_RIVENS_RAD_TO_INDEX = BETTER_FPS_RIVENS_COUNT / BETTER_FPS_RIVENS_RAD_FULL;
+	private static final float BETTER_FPS_RIVENS_DEG_TO_INDEX = BETTER_FPS_RIVENS_COUNT / 360.0F;
+	private static final float[] BETTER_FPS_RIVENS_SIN = new float[BETTER_FPS_RIVENS_COUNT];
+	private static final float[] BETTER_FPS_RIVENS_COS = new float[BETTER_FPS_RIVENS_COUNT];
+	private static final float[] BETTER_FPS_RIVENS_FULL = new float[BETTER_FPS_RIVENS_COUNT];
+	private static final float[] BETTER_FPS_RIVENS_HALF = new float[BETTER_FPS_RIVENS_COUNT2];
+	private static final int BETTER_FPS_LIBGDX_MASK = 16383;
+	private static final float BETTER_FPS_LIBGDX_RAD_TO_INDEX = 2607.5945F;
+	private static final float[] BETTER_FPS_LIBGDX_TABLE = new float[16384];
+	private static int betterFpsAlgorithm = BETTER_FPS_DEFAULT_ALGORITHM;
 	private static final int[] multiplyDeBruijnBitPosition;
 	private static final double field_181163_d;
 	private static final double[] field_181164_e;
 	private static final double[] field_181165_f;
 
+	public static String getDefaultBetterFpsAlgorithm() {
+		return BETTER_FPS_ALGORITHMS[BETTER_FPS_DEFAULT_ALGORITHM];
+	}
+
+	public static String normalizeBetterFpsAlgorithm(String name) {
+		return BETTER_FPS_ALGORITHMS[getBetterFpsAlgorithmIndex(name)];
+	}
+
+	public static String cycleBetterFpsAlgorithm(String name, int step) {
+		int i = getBetterFpsAlgorithmIndex(name) + step;
+		int j = BETTER_FPS_ALGORITHMS.length;
+		i %= j;
+		if (i < 0) {
+			i += j;
+		}
+		return BETTER_FPS_ALGORITHMS[i];
+	}
+
+	public static void setBetterFpsAlgorithm(String name) {
+		betterFpsAlgorithm = getBetterFpsAlgorithmIndex(name);
+	}
+
+	private static int getBetterFpsAlgorithmIndex(String name) {
+		if (name != null) {
+			for (int i = 0; i < BETTER_FPS_ALGORITHMS.length; ++i) {
+				if (BETTER_FPS_ALGORITHMS[i].equals(name)) {
+					return i;
+				}
+			}
+		}
+		return BETTER_FPS_DEFAULT_ALGORITHM;
+	}
+
+	private static float betterFpsSinRivens(float value) {
+		return BETTER_FPS_RIVENS_SIN[(int) (value * BETTER_FPS_RIVENS_RAD_TO_INDEX) & BETTER_FPS_RIVENS_MASK];
+	}
+
+	private static float betterFpsCosRivens(float value) {
+		return BETTER_FPS_RIVENS_COS[(int) (value * BETTER_FPS_RIVENS_RAD_TO_INDEX) & BETTER_FPS_RIVENS_MASK];
+	}
+
+	private static float betterFpsSinLibGDX(float value) {
+		return BETTER_FPS_LIBGDX_TABLE[(int) (value * BETTER_FPS_LIBGDX_RAD_TO_INDEX) & BETTER_FPS_LIBGDX_MASK];
+	}
+
+	private static float betterFpsSinRivensFull(float value) {
+		return BETTER_FPS_RIVENS_FULL[(int) (value * BETTER_FPS_RIVENS_RAD_TO_INDEX) & BETTER_FPS_RIVENS_MASK];
+	}
+
+	private static float betterFpsSinRivensHalf(float value) {
+		int i = (int) (value * BETTER_FPS_RIVENS_RAD_TO_INDEX) & BETTER_FPS_RIVENS_MASK;
+		int j = i & BETTER_FPS_RIVENS_MASK2;
+		return BETTER_FPS_RIVENS_HALF[j] * (i == j ? 1.0F : -1.0F);
+	}
+
+	private static float betterFpsTaylorSin(float value) {
+		double d0 = value;
+		double d1 = d0 * d0;
+		double d2 = d1 * d0;
+		double d3 = d1 * d2;
+		double d4 = d1 * d3;
+		double d5 = d1 * d4;
+		double d6 = d1 * d5;
+		double d7 = d1 * d6;
+		double d8 = d1 * d7;
+		double d9 = d0;
+		d9 -= d2 * 0.16666666666666666D;
+		d9 += d3 * 0.008333333333333333D;
+		d9 -= d4 * 1.984126984126984E-4D;
+		d9 += d5 * 2.7557319223985893E-6D;
+		d9 -= d6 * 2.505210838544172E-8D;
+		d9 += d7 * 1.6059043836821613E-10D;
+		d9 -= d8 * 7.647163731819816E-13D;
+		d9 += d1 * d8 * 2.8114572543455206E-15D;
+		return (float) d9;
+	}
+
 	/**+
 	 * sin looked up in a table
 	 */
 	public static float sin(float parFloat1) {
-		return SIN_TABLE[(int) (parFloat1 * 10430.378F) & '\uffff'];
+		switch (betterFpsAlgorithm) {
+		case 1:
+			return betterFpsSinRivens(parFloat1);
+		case 2:
+			return betterFpsTaylorSin(parFloat1);
+		case 3:
+			return betterFpsSinLibGDX(parFloat1);
+		case 4:
+			return betterFpsSinRivensFull(parFloat1);
+		case 5:
+			return betterFpsSinRivensHalf(parFloat1);
+		case 6:
+			return (float) Math.sin(parFloat1);
+		case 7:
+			return (float) Math.random() * parFloat1;
+		default:
+			return SIN_TABLE[(int) (parFloat1 * 10430.378F) & '\uffff'];
+		}
 	}
 
 	/**+
 	 * cos looked up in the sin table with the appropriate offset
 	 */
 	public static float cos(float value) {
-		return SIN_TABLE[(int) (value * 10430.378F + 16384.0F) & '\uffff'];
+		switch (betterFpsAlgorithm) {
+		case 1:
+			return betterFpsCosRivens(value);
+		case 2:
+			return betterFpsTaylorSin(value + BETTER_FPS_SIN_TO_COS);
+		case 3:
+			return betterFpsSinLibGDX(value + BETTER_FPS_SIN_TO_COS);
+		case 4:
+			return betterFpsSinRivensFull(value + BETTER_FPS_SIN_TO_COS);
+		case 5:
+			return betterFpsSinRivensHalf(value + BETTER_FPS_SIN_TO_COS);
+		case 6:
+			return (float) Math.cos(value);
+		case 7:
+			return (float) Math.random() * value;
+		default:
+			return SIN_TABLE[(int) (value * 10430.378F + 16384.0F) & '\uffff'];
+		}
 	}
 
 	public static float sqrt_float(float value) {
@@ -491,6 +622,37 @@ public class MathHelper {
 	static {
 		for (int i = 0; i < 65536; ++i) {
 			SIN_TABLE[i] = (float) Math.sin((double) i * 3.141592653589793D * 2.0D / 65536.0D);
+		}
+
+		for (int i = 0; i < BETTER_FPS_RIVENS_COUNT; ++i) {
+			BETTER_FPS_RIVENS_SIN[i] = (float) Math
+					.sin(((float) i + 0.5F) / (float) BETTER_FPS_RIVENS_COUNT * BETTER_FPS_RIVENS_RAD_FULL);
+			BETTER_FPS_RIVENS_COS[i] = (float) Math
+					.cos(((float) i + 0.5F) / (float) BETTER_FPS_RIVENS_COUNT * BETTER_FPS_RIVENS_RAD_FULL);
+			BETTER_FPS_RIVENS_FULL[i] = (float) Math.sin(
+					(i + Math.min(1, i % BETTER_FPS_RIVENS_COUNT / 4) * 0.5D) / BETTER_FPS_RIVENS_COUNT
+							* BETTER_FPS_RIVENS_RAD_FULL);
+			if (i < BETTER_FPS_RIVENS_COUNT2) {
+				BETTER_FPS_RIVENS_HALF[i] = (float) Math.sin(
+						(i + Math.min(1, i % BETTER_FPS_RIVENS_COUNT / 4) * 0.5D) / BETTER_FPS_RIVENS_COUNT
+								* BETTER_FPS_RIVENS_RAD_FULL);
+			}
+		}
+
+		for (int i = 0; i < 360; i += 90) {
+			BETTER_FPS_RIVENS_SIN[(int) (i * BETTER_FPS_RIVENS_DEG_TO_INDEX) & BETTER_FPS_RIVENS_MASK] = (float) Math
+					.sin(i * Math.PI / 180.0D);
+			BETTER_FPS_RIVENS_COS[(int) (i * BETTER_FPS_RIVENS_DEG_TO_INDEX) & BETTER_FPS_RIVENS_MASK] = (float) Math
+					.cos(i * Math.PI / 180.0D);
+		}
+
+		for (int i = 0; i < BETTER_FPS_LIBGDX_TABLE.length; ++i) {
+			BETTER_FPS_LIBGDX_TABLE[i] = (float) Math.sin(((float) i + 0.5F) / 16384.0F * 6.2831855F);
+		}
+
+		for (int i = 0; i < 360; i += 90) {
+			BETTER_FPS_LIBGDX_TABLE[(int) (i * 45.511112F) & BETTER_FPS_LIBGDX_MASK] = (float) Math
+					.sin(i * 0.017453292F);
 		}
 
 		multiplyDeBruijnBitPosition = new int[] { 0, 1, 28, 2, 29, 14, 24, 3, 30, 22, 20, 15, 25, 17, 4, 8, 31, 27, 13,

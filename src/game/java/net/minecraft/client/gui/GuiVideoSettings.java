@@ -69,8 +69,10 @@ public class GuiVideoSettings extends GuiScreen {
 	public void initGui() {
 		this.screenTitle = I18n.format("options.videoTitle", new Object[0]);
 		this.buttonList.clear();
+		this.buttonList.add(new GuiButton(201, this.width / 2 - 155, this.height - 27, 150, 20,
+				I18n.format("options.betterFps.button", new Object[0])));
 		this.buttonList.add(
-				new GuiButton(200, this.width / 2 - 100, this.height - 27, I18n.format("gui.done", new Object[0])));
+				new GuiButton(200, this.width / 2 + 5, this.height - 27, 150, 20, I18n.format("gui.done", new Object[0])));
 		this.optionsRowList = new GuiOptionsRowList(this.mc, this.width, this.height, 32, this.height - 32, 25,
 				videoOptions);
 		if (!DynamicLightsStateManager.isSupported()) {
@@ -117,6 +119,10 @@ public class GuiVideoSettings extends GuiScreen {
 	 */
 	protected void actionPerformed(GuiButton parGuiButton) {
 		if (parGuiButton.enabled) {
+			if (parGuiButton.id == 201) {
+				this.mc.displayGuiScreen(new GuiBetterFpsSettings(this, this.guiGameSettings));
+			}
+
 			if (parGuiButton.id == 200) {
 				this.mc.gameSettings.saveOptions();
 				GuiScreen contScreen = parentGuiScreen;
